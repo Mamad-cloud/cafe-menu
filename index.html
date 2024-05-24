@@ -1,11 +1,169 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cafe Menu</title>
-  </head>
-  <body>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="tw-output.css">
+  <title>Cafe Menu</title>
+  <style>
+  </style>
+</head>
+
+<body class="flex w-full flex-col dark:bg-gray-950">
+  <header class=""></header>
+  <div id="swiper-container" class="flex w-full h-32 relative overflow-hidden bg-neutral-950 bg-opacity-60">
+    <div id="slider" class="flex grow relative flex-row h-full items-end">
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+
+    </div>
+  </div>
+</body>
+
+<script type="module" src="/src/main.ts"></script>
+<script>
+
+  const swiper_container = document.getElementById('swiper-container')
+  let startX, endX, swipeDir, swipeThreshold = 50, swipeActive = false;
+
+  const slider = document.getElementById('slider')
+  let slideCount, slideWidth, position, sliderWidth, itemsPerSlide = 3
+  let activeSlideID = -1
+
+  const slides = slider.children
+
+
+  slideWidth = swiper_container.offsetWidth / itemsPerSlide
+  slideCount = slides.length
+  position = slider.style.left
+  sliderWidth = slideWidth * slideCount
+
+  slider.style.width = `${sliderWidth}px`
+  slider.style.transition = 'transform 0.3s ease-in-out'
+  
+  
+  console.log(slideWidth, slideCount, sliderWidth)
+  let index = 0
+  for (child of slides) {
+
+    child.style.width = `${slideWidth}px`
+    child.style.height = `80%`
+    child.style.transition = 'height 0.3s ease'
+    child.style.transition = 'opacity 0.6s ease-in-out'
+    child.id = `slide-${index}`
+    child.setAttribute('slide-id', index)
+    child.setAttribute('item-ref', 'cake')
+
+    if (index < slideCount - 1)
+      child.style.paddingRight = '10px'
+
+    
+    child.style.opacity = `0.2`
+    child.style.backgroundColor = `#10b2b5`
+    child.style.borderRadius = `10px`
+
+
+    child.addEventListener('pointerup', (e) => {
+      if (!swipeActive) { // only when swipe is not active
+        activateSlide(Number(e.target.getAttribute('slide-id')))
+        position = -slideWidth * activeSlideID + slideWidth
+        slider.style.transform = `translateX(${position}px)`
+      }
+
+    })
+
+    index++
+  }
+
+
+  // Event Handlers -----------------------------------------------------
+
+  swiper_container.addEventListener('touchstart', (e) => {
+    startX = e.touches[0].clientX
+  })
+
+  swiper_container.addEventListener('touchmove', (e) => {
+    swipeActive = true
+    e.preventDefault()
+  })
+
+
+  swiper_container.addEventListener('touchend', (e) => {
+    endX = e.changedTouches[0].clientX
+    swipeDir = endX - startX
+    if (Math.abs(swipeDir) > swipeThreshold)
+      handleSwipe(swipeDir)
+    swipeActive = false
+  })
+  // --------------------------------------------------------------
+
+  function handleSwipe(swipeDir) {
+    if (swipeDir < 0) {
+      // handle left swipe (must go right)
+      console.log('left')
+      if (activeSlideID < slideCount - 1) {
+        activateSlide(activeSlideID + 1)
+      }
+
+      if (activeSlideID > 1) {
+        position = 0 - ((activeSlideID - 1) * slideWidth)
+      } else if (activeSlideID === slideCount - 1 || activeSlideID === slideCount - 2) {
+        position = 0 - (activeSlideID - itemsPerSlide) * slideWidth
+      } else {
+        position = 0
+      }
+
+      // slider.style.left = `${position}px`
+      slider.style.transform = `translateX(${position}px)`
+
+    } else {
+      // handle right swipe
+      console.log('right')
+      if (activeSlideID > 0) {
+        activateSlide(activeSlideID - 1)
+      }
+
+      if (activeSlideID < slideCount - 2) {
+        position = 0 - ((activeSlideID - 1) * slideWidth)
+      } else if (activeSlideID === 0 || activeSlideID === 1) {
+        position = 0
+      } else {
+        position = 0 - (slideCount - itemsPerSlide) * slideWidth
+      }
+
+      // slider.style.left = `${position}px`
+      slider.style.transform = `translateX(${position}px)`
+    }
+
+    const activeSlide = document.getElementById(`slide-${activeSlideID}`)
+    const ref = activeSlide.getAttribute('item-ref')
+    const host = window.location.host
+    window.location.replace(`${host}/#${ref}`)
+
+  }
+
+  function activateSlide(slideID) {
+
+    let index = 0
+    for (slide of slides) {
+      if (Number(slide.getAttribute('slide-id')) === slideID) {
+        slide.style.height = `100%`
+        slide.style.opacity = `0.9`
+        activeSlideID = slideID
+      }
+      else {
+        slide.style.height = `80%`
+        slide.style.opacity = `0.2`
+
+      }
+      index++
+    }
+  }
+
+</script>
+
 </html>
