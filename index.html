@@ -6,36 +6,83 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="tw-output.css">
   <title>Cafe Menu</title>
-  <style>
-  </style>
+
 </head>
 
-<body class="flex w-full flex-col dark:bg-gray-950">
+<body class="flex relative w-full flex-col dark:bg-gray-950">
   <header class=""></header>
-  <div id="swiper-container" class="flex w-full h-32 relative overflow-hidden bg-neutral-950 bg-opacity-60">
-    <div id="slider" class="flex grow relative flex-row h-full items-end">
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
-      <div></div>
+  
+  <div id="swiper-container" class="flex w-full h-32 sticky top-0 pt-2 overflow-hidden">
+    <div id="slider" class="flex grow relative flex-row h-full items-end gap-3">
 
     </div>
   </div>
+
+
+
+  <section id="cake" class="h-screen pt-[130px]">
+    <h1 class="font-bold text-2xl text-white">Cake</h1>
+  </section>
+
+  <section id="coffee" class="h-screen pt-[130px]">
+    <h1 class="font-bold text-2xl text-white">Coffee</h1>
+  </section>
+  <section id="sharbat" class="h-screen pt-[130px]">
+    <h1 class="font-bold text-2xl text-white">Sharbat</h1>
+
+  </section>
+  <section id="pizza" class="h-screen pt-[130px]">
+    <h1 class="font-bold text-2xl text-white">Pizza</h1>
+
+  </section>
+  <section id="helkawron" class="h-screen pt-[130px]">
+    <h1 class="font-bold text-2xl text-white">Helkawron</h1>
+
+  </section>
 </body>
 
 <script type="module" src="/src/main.ts"></script>
-<script>
 
+<script>
+  // TODO: add svgs, add the slides to the swiper automatically, overlay a top layer on slides for event handling
   const swiper_container = document.getElementById('swiper-container')
+  swiper_container.style.background = `linear-gradient(0deg, rgba(0,0,0,1) 0%, rgba(27,174,189,1) 100%)`
   let startX, endX, swipeDir, swipeThreshold = 50, swipeActive = false;
 
   const slider = document.getElementById('slider')
   let slideCount, slideWidth, position, sliderWidth, itemsPerSlide = 3
   let activeSlideID = -1
 
-  const slides = slider.children
+  const slideItems = [
+    {
+      itemId: 'cake',
+      title: 'Cake',
+      imgUrl: 'assets/cake.svg'
+    },
+    {
+      itemId: 'coffee',
+      title: 'Coffee',
+      imgUrl: 'assets/cake.svg'
+    },
+    {
+      itemId: 'sharbat',
+      title: 'Sharbat',
+      imgUrl: 'assets/cake.svg'
+    },
+    {
+      itemId: 'pizza',
+      title: 'Pizza',
+      imgUrl: 'assets/cake.svg'
+    },
 
+  ]
+
+  for (item of slideItems) {
+    let _div = document.createElement('div')
+    slider.appendChild(_div)
+  }
+
+  const slides = slider.children
 
   slideWidth = swiper_container.offsetWidth / itemsPerSlide
   slideCount = slides.length
@@ -44,37 +91,66 @@
 
   slider.style.width = `${sliderWidth}px`
   slider.style.transition = 'transform 0.3s ease-in-out'
-  
-  
-  console.log(slideWidth, slideCount, sliderWidth)
+
   let index = 0
   for (child of slides) {
+    child.style.position = 'relative'
+    child.style.display = 'flex'
+    child.style.flexDirection = 'column'
+    child.style.gap = '8px'
+    child.style.alignItems = 'center'
+    child.style.justifyContent = 'center'
 
     child.style.width = `${slideWidth}px`
     child.style.height = `80%`
+
     child.style.transition = 'height 0.3s ease'
     child.style.transition = 'opacity 0.6s ease-in-out'
-    child.id = `slide-${index}`
-    child.setAttribute('slide-id', index)
-    child.setAttribute('item-ref', 'cake')
+    child.style.transition = `background 0.3 ease`
 
-    if (index < slideCount - 1)
-      child.style.paddingRight = '10px'
+    //child.style.opacity = `0.2`
+    //child.style.backgroundColor = `#10b2b5`
+    child.style.background = `rgba(208, 209, 210, 0.6)` 
 
-    
-    child.style.opacity = `0.2`
-    child.style.backgroundColor = `#10b2b5`
     child.style.borderRadius = `10px`
 
+    child.id = `slide-${index}`
+    child.setAttribute('slide-id', index)
+    child.setAttribute('item-id-ref', slideItems[index].itemId)
 
-    child.addEventListener('pointerup', (e) => {
+    
+
+    const img = document.createElement('img')
+    img.src = slideItems[index].imgUrl
+    img.width = 50
+    img.height = 50
+    child.appendChild(img)
+
+    const text = document.createElement('h3')
+    text.innerText = `${slideItems[index].title}`
+    text.style.margin = `0`
+    text.style.fontWeight = 'bold'
+    text.style.fontSize = '27px'
+    text.style.color = '#010101'
+    child.appendChild(text)
+
+    const eventDiv = document.createElement('div')
+    eventDiv.style.position = 'absolute'
+    eventDiv.style.width = '100%'
+    eventDiv.style.height = '100%'
+    eventDiv.style.opacity = '0'
+    
+    eventDiv.addEventListener('pointerup', (e) => {
       if (!swipeActive) { // only when swipe is not active
-        activateSlide(Number(e.target.getAttribute('slide-id')))
+        
+        activateSlide(Number(e.target.parentNode.getAttribute('slide-id'))) // propagate to parent
         position = -slideWidth * activeSlideID + slideWidth
         slider.style.transform = `translateX(${position}px)`
+        scrollToItem()
       }
-
+      
     })
+    child.appendChild(eventDiv)
 
     index++
   }
@@ -117,7 +193,6 @@
         position = 0
       }
 
-      // slider.style.left = `${position}px`
       slider.style.transform = `translateX(${position}px)`
 
     } else {
@@ -135,15 +210,11 @@
         position = 0 - (slideCount - itemsPerSlide) * slideWidth
       }
 
-      // slider.style.left = `${position}px`
       slider.style.transform = `translateX(${position}px)`
     }
 
-    const activeSlide = document.getElementById(`slide-${activeSlideID}`)
-    const ref = activeSlide.getAttribute('item-ref')
-    const host = window.location.host
-    window.location.replace(`${host}/#${ref}`)
 
+    scrollToItem()
   }
 
   function activateSlide(slideID) {
@@ -152,16 +223,35 @@
     for (slide of slides) {
       if (Number(slide.getAttribute('slide-id')) === slideID) {
         slide.style.height = `100%`
-        slide.style.opacity = `0.9`
+        //slide.style.opacity = `0.9`
         activeSlideID = slideID
+        slide.style.backgroundColor = `#10b2b5` 
       }
       else {
         slide.style.height = `80%`
-        slide.style.opacity = `0.2`
+        slide.style.background = `rgba(208, 209, 210, 0.6)` 
+
+        //slide.style.opacity = `0.2`
 
       }
       index++
     }
+  }
+
+  function scrollToItem() {
+    const activeSlide = document.getElementById(`slide-${activeSlideID}`)
+    const ref = activeSlide.getAttribute('item-id-ref')
+    const refElem = document.getElementById(ref)
+
+    // const rect = refElem.getBoundingClientRect()
+    // window.scrollTo( { behavior: 'smooth', top: rect.top + document.body.scrollTop})
+    if (refElem) {
+      refElem.scrollIntoView({
+        behavior: 'smooth',
+      })
+    }
+
+
   }
 
 </script>
